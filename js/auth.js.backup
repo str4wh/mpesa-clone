@@ -1,0 +1,524 @@
+// Authentication Module
+let loginRecaptchaVerifier = null;
+let signupRecaptchaVerifier = null;
+let loginConfirmationResult = null;
+let signupConfirmationResult = null;
+let loginTimerInterval = null;
+let signupTimerInterval = null;
+
+// Show/Hide Auth Modal Functions
+function showLogin() {
+  const modal = document.getElementById("auth-modal");
+  const loginForm = document.getElementById("login-form");
+  const signupForm = document.getElementById("signup-form");
+
+  modal.classList.add("active");
+  loginForm.classList.remove("hidden");
+  signupForm.classList.add("hidden");
+
+  // Initialize reCAPTCHA for login
+  initializeRecaptcha("login");
+}
+
+function showSignup() {
+  const modal = document.getElementById("auth-modal");
+  const loginForm = document.getElementById("login-form");
+  const signupForm = document.getElementById("signup-form");
+
+  modal.classList.add("active");
+  loginForm.classList.add("hidden");
+  signupForm.classList.remove("hidden");
+
+  // Initialize reCAPTCHA for signup
+  initializeRecaptcha("signup");
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById("auth-modal");
+  modal.classList.remove("active");
+
+  // Reset forms
+  resetLoginForm();
+  resetSignupForm();
+}
+
+function switchToLogin() {
+  resetSignupForm();
+  showLogin();
+}
+
+function switchToSignup() {
+  resetLoginForm();
+  showSignup();
+}
+
+// Initialize reCAPTCHA
+function initializeRecaptcha(type) {
+  const containerId =
+    type === "login"
+      ? "recaptcha-container-login"
+      : "recaptcha-container-signup";
+  const container = document.getElementById(containerId);
+
+  // Clear existing reCAPTCHA
+  container.innerHTML = "";
+
+  try {
+    const verifier = new firebase.auth.RecaptchaVerifier(containerId, {
+      size: "normal",
+      callback: (response) => {
+        console.log("reCAPTCHA solved");
+      },
+      "expired-callback": () => {
+        showToast("reCAPTCHA expired. Please try again.", "error");
+      },
+    });
+
+    verifier.render();
+
+    if (type === "login") {
+      loginRecaptchaVerifier = verifier;
+    } else {
+      signupRecaptchaVerifier = verifier;
+    }
+
+    console.log(`${type} reCAPTCHA initialized`);
+  } catch (error) {
+    console.error("Error initializing reCAPTCHA:", error);
+  }
+}
+
+// Login Flow
+async function sendLoginOTP() {
+  const phoneInput = document.getElementById("login-phone").value.trim();
+
+  if (!phoneInput || phoneInput.length !== 9) {
+    showToast("Please enter a valid 9-digit phone number", "error");
+    return;
+  }
+
+  const phoneNumber = "+254" + phoneInput;
+
+  showLoading(true);
+
+  try {
+    loginConfirmationResult = await auth.signInWithPhoneNumber(
+      phoneNumber,
+      loginRecaptchaVerifier,
+    );
+
+    // Show OTP section
+    document.getElementById("login-otp-section").classList.remove("hidden");
+    document.getElementById("login-send-otp").classList.add("hidden");
+    document.getElementById("login-verify-otp").classList.remove("hidden");
+
+    // Start countdown timer
+    startOTPTimer("login", 60);
+
+    showToast("OTP sent to your phone!", "success");
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    handleAuthError(error);
+
+    // Reset reCAPTCHA
+    loginRecaptchaVerifier = null;
+    initializeRecaptcha("login");
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function verifyLoginOTP() {
+  const otp = document.getElementById("login-otp").value.trim();
+
+  if (!otp || otp.length !== 6) {
+    showToast("Please enter a valid 6-digit OTP", "error");
+    return;
+  }
+
+  showLoading(true);
+
+  try {
+    const result = await loginConfirmationResult.confirm(otp);
+    const user = result.user;
+
+    // Check if user exists in database
+    const userDoc = await db.collection("users").doc(user.uid).get();
+
+    if (!userDoc.exists) {
+      showToast("Account not found. Please sign up first.", "error");
+      await auth.signOut();
+      showLoading(false);
+      return;
+    }
+
+    // Update last login
+    await db.collection("users").doc(user.uid).update({
+      lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    showToast("Login successful!", "success");
+    closeAuthModal();
+
+    // Navigate to dashboard
+    setTimeout(() => {
+      navigateTo("dashboard");
+    }, 500);
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    if (error.code === "auth/invalid-verification-code") {
+      showToast("Invalid OTP. Please try again.", "error");
+    } else {
+      handleAuthError(error);
+    }
+  } finally {
+    showLoading(false);
+  }
+}
+
+// Signup Flow
+async function sendSignupOTP() {
+  const name = document.getElementById("signup-name").value.trim();
+  const phoneInput = document.getElementById("signup-phone").value.trim();
+  const email = document.getElementById("signup-email").value.trim();
+  const nationalId = document.getElementById("signup-id").value.trim();
+  const pin = document.getElementById("signup-pin").value.trim();
+  const termsAccepted = document.getElementById("signup-terms").checked;
+
+  // Validation
+  if (!name) {
+    showToast("Please enter your full name", "error");
+    return;
+  }
+
+  if (!phoneInput || phoneInput.length !== 9) {
+    showToast("Please enter a valid 9-digit phone number", "error");
+    return;
+  }
+
+  if (!nationalId) {
+    showToast("Please enter your National ID or Passport number", "error");
+    return;
+  }
+
+  if (!pin || pin.length < 4 || pin.length > 6) {
+    showToast("PIN must be between 4-6 digits", "error");
+    return;
+  }
+
+  if (!/^\d+$/.test(pin)) {
+    showToast("PIN must contain only numbers", "error");
+    return;
+  }
+
+  if (!termsAccepted) {
+    showToast("Please accept the Terms and Conditions", "error");
+    return;
+  }
+
+  const phoneNumber = "+254" + phoneInput;
+
+  // Store signup data temporarily
+  window.signupData = {
+    name,
+    phoneNumber,
+    email,
+    nationalId,
+    pin,
+  };
+
+  showLoading(true);
+
+  try {
+    signupConfirmationResult = await auth.signInWithPhoneNumber(
+      phoneNumber,
+      signupRecaptchaVerifier,
+    );
+
+    // Show OTP section
+    document.getElementById("signup-otp-section").classList.remove("hidden");
+    document.getElementById("signup-send-otp").classList.add("hidden");
+    document.getElementById("signup-verify-otp").classList.remove("hidden");
+
+    // Start countdown timer
+    startOTPTimer("signup", 60);
+
+    showToast("OTP sent to your phone!", "success");
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    handleAuthError(error);
+
+    // Reset reCAPTCHA
+    signupRecaptchaVerifier = null;
+    initializeRecaptcha("signup");
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function verifySignupOTP() {
+  const otp = document.getElementById("signup-otp").value.trim();
+
+  if (!otp || otp.length !== 6) {
+    showToast("Please enter a valid 6-digit OTP", "error");
+    return;
+  }
+
+  showLoading(true);
+
+  try {
+    const result = await signupConfirmationResult.confirm(otp);
+    const user = result.user;
+
+    // Check if user already exists
+    const userDoc = await db.collection("users").doc(user.uid).get();
+
+    if (userDoc.exists) {
+      showToast("Account already exists. Please login instead.", "error");
+      showLoading(false);
+      switchToLogin();
+      return;
+    }
+
+    // Create user document in Firestore
+    await db
+      .collection("users")
+      .doc(user.uid)
+      .set({
+        name: window.signupData.name,
+        phone: window.signupData.phoneNumber,
+        email: window.signupData.email || "",
+        nationalId: window.signupData.nationalId,
+        pin: window.signupData.pin, // In production, hash this!
+        balance: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+        profilePicture: "",
+        isVerified: true,
+      });
+
+    // Clear temporary data
+    delete window.signupData;
+
+    showToast("Account created successfully!", "success");
+    closeAuthModal();
+
+    // Navigate to dashboard
+    setTimeout(() => {
+      navigateTo("dashboard");
+    }, 500);
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    if (error.code === "auth/invalid-verification-code") {
+      showToast("Invalid OTP. Please try again.", "error");
+    } else {
+      handleAuthError(error);
+    }
+  } finally {
+    showLoading(false);
+  }
+}
+
+// Resend OTP
+async function resendOTP(type) {
+  if (type === "login") {
+    // Reset and resend
+    resetLoginForm();
+    showLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    showLoading(false);
+    await sendLoginOTP();
+  } else {
+    // Reset and resend
+    document.getElementById("signup-otp").value = "";
+    document.getElementById("signup-otp-section").classList.add("hidden");
+    document.getElementById("signup-send-otp").classList.remove("hidden");
+    document.getElementById("signup-verify-otp").classList.add("hidden");
+    showLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    showLoading(false);
+    await sendSignupOTP();
+  }
+}
+
+// OTP Timer
+function startOTPTimer(type, seconds) {
+  const timerElement = document.getElementById(`${type}-timer`);
+  const resendButton = document.getElementById(`${type}-resend-btn`);
+  const resendTimer = document.getElementById(`${type}-resend-timer`);
+
+  let timeLeft = seconds;
+
+  const intervalId = setInterval(() => {
+    timeLeft--;
+    timerElement.textContent = timeLeft;
+
+    if (timeLeft <= 0) {
+      clearInterval(intervalId);
+      resendTimer.classList.add("hidden");
+      resendButton.classList.remove("hidden");
+    }
+  }, 1000);
+
+  if (type === "login") {
+    loginTimerInterval = intervalId;
+  } else {
+    signupTimerInterval = intervalId;
+  }
+
+  resendTimer.classList.remove("hidden");
+  resendButton.classList.add("hidden");
+}
+
+// Reset Forms
+function resetLoginForm() {
+  document.getElementById("login-phone").value = "";
+  document.getElementById("login-otp").value = "";
+  document.getElementById("login-otp-section").classList.add("hidden");
+  document.getElementById("login-send-otp").classList.remove("hidden");
+  document.getElementById("login-verify-otp").classList.add("hidden");
+
+  if (loginTimerInterval) {
+    clearInterval(loginTimerInterval);
+  }
+}
+
+function resetSignupForm() {
+  document.getElementById("signup-name").value = "";
+  document.getElementById("signup-phone").value = "";
+  document.getElementById("signup-email").value = "";
+  document.getElementById("signup-id").value = "";
+  document.getElementById("signup-pin").value = "";
+  document.getElementById("signup-otp").value = "";
+  document.getElementById("signup-terms").checked = false;
+  document.getElementById("signup-otp-section").classList.add("hidden");
+  document.getElementById("signup-send-otp").classList.remove("hidden");
+  document.getElementById("signup-verify-otp").classList.add("hidden");
+
+  if (signupTimerInterval) {
+    clearInterval(signupTimerInterval);
+  }
+}
+
+// Logout
+async function logout() {
+  try {
+    await auth.signOut();
+    showToast("Logged out successfully", "success");
+    navigateTo("landing-page");
+  } catch (error) {
+    console.error("Error logging out:", error);
+    showToast("Error logging out", "error");
+  }
+}
+
+// Auth State Observer
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    console.log("User is signed in:", user.uid);
+
+    // Load user data
+    try {
+      const userDoc = await db.collection("users").doc(user.uid).get();
+      if (userDoc.exists) {
+        window.currentUser = {
+          uid: user.uid,
+          ...userDoc.data(),
+        };
+
+        // Update UI with user data
+        updateUserUI();
+      }
+    } catch (error) {
+      console.error("Error loading user data:", error);
+    }
+  } else {
+    console.log("User is signed out");
+    window.currentUser = null;
+
+    // Redirect to landing page if on protected route
+    const currentSection = document.querySelector(".section.active");
+    if (currentSection && currentSection.id !== "landing-page") {
+      navigateTo("landing-page");
+    }
+  }
+});
+
+// Update UI with user data
+function updateUserUI() {
+  if (!window.currentUser) return;
+
+  const userName = document.getElementById("user-name");
+  const userPhone = document.getElementById("user-phone");
+  const balanceValue = document.getElementById("balance-value");
+
+  if (userName) {
+    userName.textContent = window.currentUser.name;
+  }
+
+  if (userPhone) {
+    const phone = window.currentUser.phone;
+    const masked =
+      phone.substring(0, 4) + " *** *** " + phone.substring(phone.length - 3);
+    userPhone.textContent = masked;
+  }
+
+  if (balanceValue && window.balanceVisible) {
+    balanceValue.textContent = window.currentUser.balance.toLocaleString();
+  }
+
+  // Update last login timestamp
+  const lastLoginElement = document.getElementById("last-login");
+  if (lastLoginElement && window.currentUser.lastLogin) {
+    const date = window.currentUser.lastLogin.toDate();
+    lastLoginElement.textContent = formatDate(date);
+  }
+}
+
+// Handle Auth Errors
+function handleAuthError(error) {
+  console.error("Auth Error:", error);
+
+  switch (error.code) {
+    case "auth/invalid-phone-number":
+      showToast("Invalid phone number format", "error");
+      break;
+    case "auth/too-many-requests":
+      showToast("Too many attempts. Please try again later.", "error");
+      break;
+    case "auth/quota-exceeded":
+      showToast("SMS quota exceeded. Please try again later.", "error");
+      break;
+    case "auth/network-request-failed":
+      showToast("Network error. Please check your connection.", "error");
+      break;
+    default:
+      showToast("An error occurred. Please try again.", "error");
+  }
+}
+
+// Format Date
+function formatDate(date) {
+  const now = new Date();
+  const diff = now - date;
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days === 0) {
+    if (hours === 0) {
+      if (minutes === 0) {
+        return "Just now";
+      }
+      return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+    }
+    return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  } else if (days === 1) {
+    return "Yesterday";
+  } else if (days < 7) {
+    return `${days} days ago`;
+  } else {
+    return date.toLocaleDateString();
+  }
+}

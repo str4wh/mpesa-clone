@@ -1,0 +1,1303 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>M-Pesa - Send Money, Pay Bills, Buy Airtime</title>
+    <meta
+      name="description"
+      content="M-Pesa - Kenya's leading mobile money platform. Send money, pay bills, buy airtime and more."
+    />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+
+    <!-- Font Awesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+  </head>
+  <body>
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- LANDING PAGE SECTION -->
+    <!-- ============================================ -->
+    <section id="landing-page" class="section active">
+      <!-- Navigation -->
+      <nav class="landing-nav">
+        <div class="container">
+          <div class="nav-content">
+            <div class="logo">
+              <i class="fas fa-mobile-alt"></i>
+              <span>M-PESA</span>
+            </div>
+            <div class="nav-buttons">
+              <button class="btn btn-outline" onclick="showLogin()">
+                Login
+              </button>
+              <button class="btn btn-primary" onclick="showSignup()">
+                Sign Up
+              </button>
+            </div>
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+              <i class="fas fa-bars"></i>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Mobile Menu -->
+      <div id="mobile-menu" class="mobile-menu">
+        <button class="btn btn-outline btn-block" onclick="showLogin()">
+          Login
+        </button>
+        <button class="btn btn-primary btn-block" onclick="showSignup()">
+          Sign Up
+        </button>
+      </div>
+
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="container">
+          <div class="hero-content">
+            <h1 class="hero-title">Your Money at Your Fingertips</h1>
+            <p class="hero-subtitle">
+              Send money, pay bills, buy airtime and access financial services
+              instantly from your phone
+            </p>
+            <div class="hero-buttons">
+              <button class="btn btn-primary btn-lg" onclick="showSignup()">
+                Get Started
+              </button>
+              <button
+                class="btn btn-outline btn-lg"
+                onclick="scrollToFeatures()"
+              >
+                Learn More
+              </button>
+            </div>
+            <div class="trust-indicators">
+              <div class="trust-item">
+                <i class="fas fa-users"></i>
+                <span>30M+ Users</span>
+              </div>
+              <div class="trust-item">
+                <i class="fas fa-shield-alt"></i>
+                <span>100% Secure</span>
+              </div>
+              <div class="trust-item">
+                <i class="fas fa-clock"></i>
+                <span>24/7 Support</span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-image">
+            <i class="fas fa-mobile-screen-button"></i>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section id="features" class="features">
+        <div class="container">
+          <h2 class="section-title">Our Services</h2>
+          <p class="section-subtitle">
+            Everything you need to manage your money
+          </p>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-paper-plane"></i>
+              </div>
+              <h3>Send Money</h3>
+              <p>Transfer money instantly to any M-Pesa user or bank account</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-file-invoice-dollar"></i>
+              </div>
+              <h3>Pay Bills</h3>
+              <p>
+                Pay utilities, rent, and other bills directly from your phone
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-phone"></i>
+              </div>
+              <h3>Buy Airtime</h3>
+              <p>Purchase airtime for yourself or gift to friends and family</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-hand-holding-dollar"></i>
+              </div>
+              <h3>Request Money</h3>
+              <p>Request payment from friends, family or customers</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-money-bill-wave"></i>
+              </div>
+              <h3>Withdraw Cash</h3>
+              <p>Withdraw cash from our network of agents nationwide</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-piggy-bank"></i>
+              </div>
+              <h3>Save Money</h3>
+              <p>Access savings accounts and investment opportunities</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Public Feedback Section -->
+      <section id="public-feedback" class="public-feedback-section">
+        <div class="container">
+          <div class="section-header-center">
+            <h2 class="section-title">We Value Your Feedback</h2>
+            <p class="section-subtitle">
+              Help us improve our services by sharing your thoughts
+            </p>
+          </div>
+
+          <div class="feedback-container">
+            <!-- Left Column - Feedback Form -->
+            <div class="feedback-form-column">
+              <form
+                id="public-feedback-form"
+                onsubmit="submitPublicFeedback(event)"
+              >
+                <!-- Honeypot field for spam prevention -->
+                <input
+                  type="text"
+                  name="website"
+                  id="honeypot"
+                  style="display: none"
+                  tabindex="-1"
+                  autocomplete="off"
+                />
+
+                <div class="form-group">
+                  <label>Your Name <span class="required">*</span></label>
+                  <input
+                    type="text"
+                    id="public-name"
+                    placeholder="Enter your full name"
+                    required
+                    minlength="2"
+                    maxlength="50"
+                    pattern="[A-Za-z\s]+"
+                    title="Letters and spaces only"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Email Address <span class="required">*</span></label>
+                  <input
+                    type="email"
+                    id="public-email"
+                    placeholder="your.email@example.com"
+                    required
+                  />
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label
+                      >Feedback Category <span class="required">*</span></label
+                    >
+                    <select id="public-category" required>
+                      <option value="">Select category</option>
+                      <option value="general">General Feedback</option>
+                      <option value="service-quality">Service Quality</option>
+                      <option value="technical-issue">Technical Issue</option>
+                      <option value="feature-request">Feature Request</option>
+                      <option value="complaint">Complaint</option>
+                      <option value="compliment">Compliment</option>
+                      <option value="suggestion">Suggestion</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>How did you hear about us?</label>
+                    <select id="public-source">
+                      <option value="">Select source</option>
+                      <option value="friend-family">Friend/Family</option>
+                      <option value="social-media">Social Media</option>
+                      <option value="tv-radio">TV/Radio</option>
+                      <option value="agent">Agent</option>
+                      <option value="online-search">Online Search</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Subject <span class="required">*</span></label>
+                  <input
+                    type="text"
+                    id="public-subject"
+                    placeholder="Brief description of your feedback"
+                    maxlength="100"
+                    required
+                    minlength="5"
+                  />
+                  <span class="char-counter"
+                    ><span id="public-subject-counter">0</span>/100</span
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Your Message <span class="required">*</span></label>
+                  <textarea
+                    id="public-message"
+                    placeholder="Tell us what you think or what we can improve..."
+                    maxlength="500"
+                    rows="5"
+                    required
+                    minlength="10"
+                  ></textarea>
+                  <span class="char-counter"
+                    ><span id="public-message-counter">0</span>/500</span
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Rate Your Experience</label>
+                  <div class="star-rating" id="public-rating">
+                    <i class="far fa-star" data-rating="1"></i>
+                    <i class="far fa-star" data-rating="2"></i>
+                    <i class="far fa-star" data-rating="3"></i>
+                    <i class="far fa-star" data-rating="4"></i>
+                    <i class="far fa-star" data-rating="5"></i>
+                  </div>
+                  <span class="rating-text" id="rating-text"></span>
+                </div>
+
+                <div class="form-group">
+                  <label>Attach Screenshot (Optional)</label>
+                  <div class="file-upload">
+                    <input
+                      type="file"
+                      id="public-attachment"
+                      accept="image/jpeg,image/png,image/jpg,application/pdf"
+                      onchange="handlePublicFileSelect(event)"
+                    />
+                    <label for="public-attachment" class="file-upload-label">
+                      <i class="fas fa-cloud-upload-alt"></i>
+                      <span id="public-file-name"
+                        >Click to upload or drag image here (Max 5MB)</span
+                      >
+                      <span class="file-types">Accepted: JPG, PNG, PDF</span>
+                    </label>
+                  </div>
+                  <div
+                    id="public-file-preview"
+                    class="file-preview hidden"
+                  ></div>
+                </div>
+
+                <div class="form-group checkbox-group">
+                  <label>
+                    <input type="checkbox" id="public-consent" required />
+                    <span
+                      >I agree to the
+                      <a href="#" onclick="showPrivacyPolicy()"
+                        >privacy policy</a
+                      >
+                      and consent to M-Pesa contacting me regarding this
+                      feedback <span class="required">*</span></span
+                    >
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  id="public-submit-btn"
+                  class="btn btn-primary btn-block btn-lg"
+                >
+                  <i class="fas fa-paper-plane"></i> Submit Feedback
+                </button>
+              </form>
+
+              <!-- Success Message -->
+              <div id="public-feedback-success" class="feedback-success hidden">
+                <div class="success-icon">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>Thank You!</h3>
+                <p class="success-message">Your feedback has been received.</p>
+                <p class="reference-number">
+                  Reference Number: <strong id="feedback-ref-number"></strong>
+                </p>
+                <p class="response-time">
+                  We'll get back to you within 24-48 hours.
+                </p>
+                <div class="success-actions">
+                  <button class="btn btn-outline" onclick="trackFeedback()">
+                    Track Your Feedback
+                  </button>
+                  <button
+                    class="btn btn-primary"
+                    onclick="resetPublicFeedbackForm()"
+                  >
+                    Submit Another
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column - Contact Information -->
+            <div class="feedback-info-column">
+              <div class="feedback-info-card">
+                <div class="feedback-icon">
+                  <i class="fas fa-comments"></i>
+                </div>
+                <h3>Why Your Feedback Matters</h3>
+                <ul class="feedback-benefits">
+                  <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>We read every message</span>
+                  </li>
+                  <li>
+                    <i class="fas fa-clock"></i>
+                    <span>Average response time: 24 hours</span>
+                  </li>
+                  <li>
+                    <i class="fas fa-heart"></i>
+                    <span>Your voice matters to us</span>
+                  </li>
+                  <li>
+                    <i class="fas fa-chart-line"></i>
+                    <span>Help us improve continuously</span>
+                  </li>
+                </ul>
+
+                <div class="alternative-contact">
+                  <h4>Other Ways to Reach Us</h4>
+                  <div class="contact-method">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                      <strong>Phone</strong>
+                      <p>+254 722 000 000</p>
+                    </div>
+                  </div>
+                  <div class="contact-method">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                      <strong>Email</strong>
+                      <p>support@mpesa.com</p>
+                    </div>
+                  </div>
+                  <div class="contact-method">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                      <strong>Working Hours</strong>
+                      <p>Mon-Fri: 8:00 AM - 6:00 PM</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="landing-footer">
+        <div class="container">
+          <div class="footer-content">
+            <div class="footer-section">
+              <h4>About M-Pesa</h4>
+              <p>
+                Kenya's leading mobile money platform, serving millions of users
+                daily with secure and reliable financial services.
+              </p>
+            </div>
+            <div class="footer-section">
+              <h4>Quick Links</h4>
+              <ul>
+                <li><a href="#features">Services</a></li>
+                <li><a href="#" onclick="showLogin()">Login</a></li>
+                <li><a href="#" onclick="showSignup()">Sign Up</a></li>
+                <li><a href="#">FAQ</a></li>
+              </ul>
+            </div>
+            <div class="footer-section">
+              <h4>Contact Us</h4>
+              <ul>
+                <li><i class="fas fa-phone"></i> +254 722 000 000</li>
+                <li><i class="fas fa-envelope"></i> support@mpesa.com</li>
+                <li><i class="fas fa-map-marker-alt"></i> Nairobi, Kenya</li>
+              </ul>
+            </div>
+            <div class="footer-section">
+              <h4>Follow Us</h4>
+              <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="footer-bottom">
+            <p>&copy; 2026 M-Pesa. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- AUTHENTICATION MODAL -->
+    <!-- ============================================ -->
+    <div id="auth-modal" class="modal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeAuthModal()">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <!-- Login Form -->
+        <div id="login-form" class="auth-form">
+          <h2>Welcome Back</h2>
+          <p class="auth-subtitle">Login to access your M-Pesa account</p>
+
+          <form onsubmit="loginWithEmail(event)">
+            <div class="form-group">
+              <label>Email Address</label>
+              <input
+                type="email"
+                id="login-email"
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                id="login-password"
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+
+            <div
+              class="form-group"
+              style="text-align: right; margin-top: -10px"
+            >
+              <a
+                href="#"
+                onclick="
+                  resetPassword();
+                  return false;
+                "
+                style="
+                  color: var(--primary-color);
+                  font-size: 14px;
+                  text-decoration: none;
+                "
+                >Forgot password?</a
+              >
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+              <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+          </form>
+
+          <div style="text-align: center; margin: 20px 0; position: relative">
+            <span
+              style="
+                background: white;
+                padding: 0 10px;
+                position: relative;
+                z-index: 1;
+                color: #999;
+              "
+              >OR</span
+            >
+            <div
+              style="
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: #e0e0e0;
+                z-index: 0;
+              "
+            ></div>
+          </div>
+
+          <button
+            class="btn btn-block"
+            onclick="loginWithGoogle()"
+            style="
+              background: white;
+              color: #333;
+              border: 2px solid #e0e0e0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 10px;
+            "
+          >
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              alt="Google"
+              style="width: 20px; height: 20px"
+            />
+            Continue with Google
+          </button>
+
+          <p class="auth-switch">
+            Don't have an account?
+            <a href="#" onclick="switchToSignup()">Sign Up</a>
+          </p>
+        </div>
+
+        <!-- Registration Form -->
+        <div id="signup-form" class="auth-form hidden">
+          <h2>Create Account</h2>
+          <p class="auth-subtitle">Join millions of M-Pesa users</p>
+
+          <form onsubmit="signupWithEmail(event)">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input
+                type="text"
+                id="signup-name"
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Email Address</label>
+              <input
+                type="email"
+                id="signup-email"
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                id="signup-password"
+                placeholder="At least 6 characters"
+                minlength="6"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Confirm Password</label>
+              <input
+                type="password"
+                id="signup-confirm-password"
+                placeholder="Re-enter your password"
+                required
+              />
+            </div>
+
+            <div class="form-group checkbox-group">
+              <label>
+                <input type="checkbox" id="signup-terms" required />
+                <span>I agree to the <a href="#">Terms and Conditions</a></span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+              <i class="fas fa-user-plus"></i> Create Account
+            </button>
+          </form>
+
+          <div style="text-align: center; margin: 20px 0; position: relative">
+            <span
+              style="
+                background: white;
+                padding: 0 10px;
+                position: relative;
+                z-index: 1;
+                color: #999;
+              "
+              >OR</span
+            >
+            <div
+              style="
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: #e0e0e0;
+                z-index: 0;
+              "
+            ></div>
+          </div>
+
+          <button
+            class="btn btn-block"
+            onclick="loginWithGoogle()"
+            style="
+              background: white;
+              color: #333;
+              border: 2px solid #e0e0e0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 10px;
+            "
+          >
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              alt="Google"
+              style="width: 20px; height: 20px"
+            />
+            Continue with Google
+          </button>
+
+          <p class="auth-switch">
+            Already have an account?
+            <a href="#" onclick="switchToLogin()">Login</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- DASHBOARD SECTION -->
+    <!-- ============================================ -->
+    <section id="dashboard" class="section">
+      <!-- Dashboard Navigation -->
+      <nav class="dashboard-nav">
+        <div class="container">
+          <div class="nav-content">
+            <div class="logo">
+              <i class="fas fa-mobile-alt"></i>
+              <span>M-PESA</span>
+            </div>
+            <div class="nav-menu">
+              <a
+                href="#"
+                onclick="navigateTo('dashboard')"
+                class="nav-link active"
+              >
+                <i class="fas fa-home"></i> Dashboard
+              </a>
+              <div class="dropdown" id="departments-dropdown-container">
+                <a
+                  href="#"
+                  class="nav-link"
+                  onclick="toggleDepartmentsDropdown(event)"
+                >
+                  <i class="fas fa-building"></i> Departments
+                  <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </a>
+                <div class="dropdown-content" id="departments-dropdown">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+              <a
+                href="#"
+                onclick="navigateTo('feedback-history')"
+                class="nav-link"
+              >
+                <i class="fas fa-comments"></i> My Feedback
+              </a>
+              <div class="dropdown">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-user"></i> Profile
+                  <i class="fas fa-chevron-down"></i>
+                </a>
+                <div class="dropdown-content">
+                  <a href="#" onclick="navigateTo('profile')"
+                    ><i class="fas fa-cog"></i> Settings</a
+                  >
+                  <a href="#" onclick="navigateTo('transaction-history')"
+                    ><i class="fas fa-history"></i> History</a
+                  >
+                  <a href="#" onclick="logout()"
+                    ><i class="fas fa-sign-out-alt"></i> Logout</a
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="nav-icons">
+              <button class="icon-btn" onclick="showNotifications()">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+              </button>
+              <div class="user-avatar" onclick="toggleProfileMenu()">
+                <i class="fas fa-user-circle"></i>
+              </div>
+            </div>
+            <button class="mobile-menu-toggle" onclick="toggleDashboardMenu()">
+              <i class="fas fa-bars"></i>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Dashboard Content -->
+      <div class="dashboard-content">
+        <div class="container">
+          <!-- Welcome Header -->
+          <div class="welcome-header">
+            <div>
+              <h1>Welcome back, <span id="user-name">User</span>!</h1>
+              <p class="timestamp">
+                Last login: <span id="last-login">Today</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Balance Card -->
+          <div class="balance-card">
+            <div class="balance-header">
+              <span class="balance-label">M-Pesa Balance</span>
+              <button class="btn-icon" onclick="toggleBalanceVisibility()">
+                <i id="balance-eye" class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="balance-amount">
+              <span class="currency">KSh</span>
+              <span id="balance-value">••••••</span>
+            </div>
+            <p class="balance-footer">
+              Account: <span id="user-phone">+254 *** *** ***</span>
+            </p>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="quick-actions">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="actions-grid">
+              <button class="action-btn" onclick="openAction('send-money')">
+                <div class="action-icon">
+                  <i class="fas fa-paper-plane"></i>
+                </div>
+                <span>Send Money</span>
+              </button>
+              <button class="action-btn" onclick="openAction('request-money')">
+                <div class="action-icon">
+                  <i class="fas fa-hand-holding-dollar"></i>
+                </div>
+                <span>Request Money</span>
+              </button>
+              <button class="action-btn" onclick="openAction('pay-bill')">
+                <div class="action-icon">
+                  <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <span>Pay Bill</span>
+              </button>
+              <button class="action-btn" onclick="openAction('buy-airtime')">
+                <div class="action-icon">
+                  <i class="fas fa-phone"></i>
+                </div>
+                <span>Buy Airtime</span>
+              </button>
+              <button class="action-btn" onclick="openAction('withdraw')">
+                <div class="action-icon">
+                  <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <span>Withdraw</span>
+              </button>
+              <button class="action-btn" onclick="navigateTo('profile')">
+                <div class="action-icon">
+                  <i class="fas fa-user-cog"></i>
+                </div>
+                <span>My Account</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Recent Transactions -->
+          <div class="recent-transactions">
+            <div class="section-header">
+              <h2 class="section-title">Recent Transactions</h2>
+              <a
+                href="#"
+                onclick="navigateTo('transaction-history')"
+                class="view-all"
+                >View All <i class="fas fa-arrow-right"></i
+              ></a>
+            </div>
+            <div id="transactions-list" class="transactions-list">
+              <!-- Populated dynamically -->
+              <div class="empty-state">
+                <i class="fas fa-receipt"></i>
+                <p>No transactions yet</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- DEPARTMENTS SECTION -->
+    <!-- ============================================ -->
+    <section id="departments" class="section">
+      <nav class="dashboard-nav">
+        <div class="container">
+          <div class="nav-content">
+            <button class="btn-back" onclick="navigateTo('dashboard')">
+              <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+            <h2>Departments</h2>
+          </div>
+        </div>
+      </nav>
+
+      <div class="container">
+        <div class="departments-grid" id="departments-grid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- DEPARTMENT DETAIL SECTION -->
+    <!-- ============================================ -->
+    <section id="department-detail" class="section">
+      <nav class="dashboard-nav">
+        <div class="container">
+          <div class="nav-content">
+            <button class="btn-back" onclick="navigateTo('departments')">
+              <i class="fas fa-arrow-left"></i> Back to Departments
+            </button>
+            <h2 id="department-name">Department</h2>
+          </div>
+        </div>
+      </nav>
+
+      <div class="container">
+        <div class="department-info">
+          <div class="department-icon" id="department-icon">
+            <i class="fas fa-building"></i>
+          </div>
+          <h1 id="department-title">Department Name</h1>
+          <p id="department-description">Department description goes here</p>
+        </div>
+
+        <div class="department-actions">
+          <button class="btn btn-primary btn-lg" onclick="openFeedbackForm()">
+            <i class="fas fa-comment-dots"></i> Send Feedback
+          </button>
+        </div>
+
+        <div class="department-categories" id="department-categories">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- FEEDBACK FORM SECTION -->
+    <!-- ============================================ -->
+    <section id="feedback-form" class="section">
+      <nav class="dashboard-nav">
+        <div class="container">
+          <div class="nav-content">
+            <button class="btn-back" onclick="goBackFromFeedback()">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <h2>Submit Feedback</h2>
+          </div>
+        </div>
+      </nav>
+
+      <div class="container">
+        <div class="form-container">
+          <form id="feedback-submission-form" onsubmit="submitFeedback(event)">
+            <div class="form-group">
+              <label>Department</label>
+              <input type="text" id="feedback-department" readonly />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Your Name</label>
+                <input type="text" id="feedback-name" readonly />
+              </div>
+              <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="feedback-email" readonly />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Subject / Title <span class="required">*</span></label>
+              <input
+                type="text"
+                id="feedback-subject"
+                placeholder="Brief description of your feedback"
+                maxlength="100"
+                required
+              />
+              <span class="char-counter"
+                ><span id="subject-counter">0</span>/100</span
+              >
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Priority Level <span class="required">*</span></label>
+                <select id="feedback-priority" required>
+                  <option value="">Select priority</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Category <span class="required">*</span></label>
+                <select id="feedback-category" required>
+                  <option value="">Select category</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label
+                >Message / Description <span class="required">*</span></label
+              >
+              <textarea
+                id="feedback-message"
+                placeholder="Describe your issue or feedback in detail..."
+                maxlength="500"
+                rows="6"
+                required
+              ></textarea>
+              <span class="char-counter"
+                ><span id="message-counter">0</span>/500</span
+              >
+            </div>
+
+            <div class="form-group">
+              <label>Attach Screenshot (Optional)</label>
+              <div class="file-upload">
+                <input
+                  type="file"
+                  id="feedback-attachment"
+                  accept="image/*"
+                  onchange="handleFileSelect(event)"
+                />
+                <label for="feedback-attachment" class="file-upload-label">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <span id="file-name"
+                    >Click to upload or drag image here (Max 5MB)</span
+                  >
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group checkbox-group">
+              <label>
+                <input type="checkbox" id="feedback-email-updates" />
+                <span>Send me email updates about this feedback</span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+              <i class="fas fa-paper-plane"></i> Submit Feedback
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- FEEDBACK HISTORY SECTION -->
+    <!-- ============================================ -->
+    <section id="feedback-history" class="section">
+      <nav class="dashboard-nav">
+        <div class="container">
+          <div class="nav-content">
+            <button class="btn-back" onclick="navigateTo('dashboard')">
+              <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+            <h2>My Feedback</h2>
+          </div>
+        </div>
+      </nav>
+
+      <div class="container">
+        <!-- Filters -->
+        <div class="feedback-filters">
+          <div class="filter-group">
+            <select id="filter-status" onchange="filterFeedback()">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="in-progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <select id="filter-department" onchange="filterFeedback()">
+              <option value="">All Departments</option>
+            </select>
+          </div>
+          <div class="search-group">
+            <input
+              type="text"
+              id="search-feedback"
+              placeholder="Search feedback..."
+              onkeyup="searchFeedback()"
+            />
+            <i class="fas fa-search"></i>
+          </div>
+        </div>
+
+        <!-- Feedback List -->
+        <div class="feedback-table-container">
+          <table class="feedback-table">
+            <thead>
+              <tr>
+                <th>Ticket #</th>
+                <th>Department</th>
+                <th>Subject</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="feedback-table-body">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+          <div id="feedback-empty-state" class="empty-state hidden">
+            <i class="fas fa-comments"></i>
+            <p>No feedback submitted yet</p>
+            <button class="btn btn-primary" onclick="navigateTo('departments')">
+              Submit Your First Feedback
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- FEEDBACK DETAIL MODAL -->
+    <!-- ============================================ -->
+    <div id="feedback-detail-modal" class="modal">
+      <div class="modal-content modal-lg">
+        <button class="modal-close" onclick="closeFeedbackDetail()">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <div class="feedback-detail">
+          <div class="feedback-detail-header">
+            <h2>Feedback Details</h2>
+            <span id="detail-status-badge" class="status-badge">Pending</span>
+          </div>
+
+          <div class="feedback-detail-content">
+            <div class="detail-row">
+              <strong>Ticket Number:</strong>
+              <span id="detail-ticket"></span>
+            </div>
+            <div class="detail-row">
+              <strong>Department:</strong>
+              <span id="detail-department"></span>
+            </div>
+            <div class="detail-row">
+              <strong>Priority:</strong>
+              <span id="detail-priority"></span>
+            </div>
+            <div class="detail-row">
+              <strong>Category:</strong>
+              <span id="detail-category"></span>
+            </div>
+            <div class="detail-row">
+              <strong>Submitted:</strong>
+              <span id="detail-date"></span>
+            </div>
+            <div class="detail-row full-width">
+              <strong>Subject:</strong>
+              <p id="detail-subject"></p>
+            </div>
+            <div class="detail-row full-width">
+              <strong>Message:</strong>
+              <p id="detail-message"></p>
+            </div>
+            <div
+              id="detail-attachment-section"
+              class="detail-row full-width hidden"
+            >
+              <strong>Attachment:</strong>
+              <a id="detail-attachment" href="#" target="_blank"
+                >View Attachment</a
+              >
+            </div>
+            <div
+              id="detail-response-section"
+              class="detail-row full-width hidden"
+            >
+              <strong>Admin Response:</strong>
+              <div class="admin-response">
+                <p id="detail-response"></p>
+                <span class="response-date"
+                  >Responded: <span id="detail-response-date"></span
+                ></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- FEEDBACK TRACKING MODAL -->
+    <!-- ============================================ -->
+    <div id="track-feedback-modal" class="modal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeTrackFeedbackModal()">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <div class="track-feedback-content">
+          <h2>Track Your Feedback</h2>
+          <p class="auth-subtitle">
+            Enter your reference number or phone number to check status
+          </p>
+
+          <div class="form-group">
+            <label>Reference Number</label>
+            <input
+              type="text"
+              id="track-reference"
+              placeholder="FB-XXXXXXXXXX"
+              maxlength="15"
+            />
+          </div>
+
+          <div class="form-divider">
+            <span>OR</span>
+          </div>
+
+          <div class="form-group">
+            <label>Phone Number</label>
+            <div class="phone-input">
+              <span class="country-code">+254</span>
+              <input
+                type="tel"
+                id="track-phone"
+                placeholder="722 000 000"
+                maxlength="9"
+              />
+            </div>
+          </div>
+
+          <button
+            class="btn btn-primary btn-block"
+            onclick="searchFeedbackByTracking()"
+          >
+            <i class="fas fa-search"></i> Search
+          </button>
+
+          <!-- Results -->
+          <div id="track-results" class="track-results hidden">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PRIVACY POLICY MODAL -->
+    <!-- ============================================ -->
+    <div id="privacy-modal" class="modal">
+      <div class="modal-content modal-lg">
+        <button class="modal-close" onclick="closePrivacyModal()">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <div class="privacy-content">
+          <h2>Privacy Policy</h2>
+          <p class="last-updated">Last updated: January 29, 2026</p>
+
+          <h3>Information We Collect</h3>
+          <p>When you submit feedback, we collect:</p>
+          <ul>
+            <li>Your name and contact information (phone number, email)</li>
+            <li>Feedback content and any attachments you provide</li>
+            <li>Device and browser information</li>
+            <li>IP address for security purposes</li>
+          </ul>
+
+          <h3>How We Use Your Information</h3>
+          <p>We use your information to:</p>
+          <ul>
+            <li>Respond to your feedback and inquiries</li>
+            <li>Improve our services based on your suggestions</li>
+            <li>Prevent spam and abuse</li>
+            <li>Comply with legal obligations</li>
+          </ul>
+
+          <h3>Data Protection</h3>
+          <p>
+            We implement appropriate security measures to protect your personal
+            information. Your data is stored securely and is only accessible to
+            authorized personnel.
+          </p>
+
+          <h3>Your Rights</h3>
+          <p>You have the right to:</p>
+          <ul>
+            <li>Access your personal data</li>
+            <li>Request correction of inaccurate data</li>
+            <li>Request deletion of your data</li>
+            <li>Withdraw consent at any time</li>
+          </ul>
+
+          <h3>Contact Us</h3>
+          <p>For privacy-related questions, contact us at: privacy@mpesa.com</p>
+
+          <button class="btn btn-primary" onclick="closePrivacyModal()">
+            I Understand
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth-email.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/feedback.js"></script>
+    <script src="js/public-feedback.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
